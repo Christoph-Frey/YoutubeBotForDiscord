@@ -182,13 +182,18 @@ class myDatabase:
         self.db_connection = None
         self.testAndSetup()
     
-    def testAndSetup(self):
+    def testAndSetup(self, conn):
         checkForTables(conn)
     
     def open(self):
+        """
+        connect to the table and make sure it is properly setup with
+        the two tables "channels" and "videos"
+        """
         if not self.opened:
             self.opened = True
-            self.db_connection = connectionToDB(self.location) 
+            self.db_connection = connectionToDB(self.location)
+            self.testAndSetup(self.db_connection)
             return self.db_connection
     
     def close(self):
