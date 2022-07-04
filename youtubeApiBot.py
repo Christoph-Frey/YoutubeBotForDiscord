@@ -55,8 +55,7 @@ class YoutubeCommands(commands.Cog):
     def updateLazyWatchlist(self, newChannel):
         # format it (upload_id, channel_id, channel_name, last_checked)
         # update the lazy list
-        self.lazyWatchlist = self.lazyWatchlist.append(newChannel)
-        pass
+        self.lazyWatchlist.append(newChannel)
     
     @commands.command()
     async def register(self, ctx, message=None):
