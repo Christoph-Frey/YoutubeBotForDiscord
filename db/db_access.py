@@ -180,7 +180,6 @@ class myDatabase:
         self.location = location
         self.opened = False
         self.db_connection = None
-        self.testAndSetup()
     
     def testAndSetup(self, conn):
         checkForTables(conn)
