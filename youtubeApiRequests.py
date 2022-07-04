@@ -122,14 +122,16 @@ def isNew(time1, time2):
     # print(time1)
     # # print(time2)
     # print(datetime.datetime.fromisoformat(time2[:-1]+"+00:00"))
-    print(time1)
-    print(time2)
-    exit()
+    # print(time1.replace)
+    # print(time2)
+    # exit()
 
     if time1 is None:
         return True
     else:
-        t1 = time1
+        # assumes time1 is in 0001-01-01 00:00:00 format
+        t1 = time1.replace(tzinfo=datetime.timezone.utc)
+        # assumes that time2 is in isoformat i.e. 2022-07-04T17:05:00Z
         t2 = datetime.datetime.fromisoformat(time2[:-1]+"+00:00")
         return t2>t1
 
