@@ -340,7 +340,7 @@ class myDatabase:
             last_checked - string -> datetime
         """
         option = selectOption(self.db_connection, key)
-        if key == 'last_checked':
+        if key == 'last_checked' and option is not None:
             option = datetime.datetime.fromisoformat(option).replace(tzinfo=datetime.timezone.utc)
             print(option)
         return option
