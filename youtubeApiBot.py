@@ -36,15 +36,14 @@ class YoutubeCommands(commands.Cog):
     def __init__(self, bot, settings=None):
         self.bot = bot
         self.myWatchlist = None
-        self.last_time_checked = None
         # self.loadSettings(settings)
         self.lazyWatchlist = None
         self.getLazyWatchlist()
 
-        if settings is not None:
-            # self.myWatchlist = settings['watchlist']
-            self.last_time_checked = settings['last_checked']
-        # self.command_prefix = "!" #  TODO: Check wheter i need this line
+        self.last_time_checked = self.bot.db.getOptionFromDB('last_checked')
+        if self.last_time_checked is None:
+            self.last_time_checked = datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
+            self.bot.db.addOptionToDB('last_checked', self.last_time_checked)
     
     def getLazyWatchlist(self):
         if self.lazyWatchlist is None:
@@ -185,8 +184,9 @@ class YoutubeCommands(commands.Cog):
                 await ctx.send(s)
 
         self.last_time_checked = new_check_time
-        settings = {'last_checked': str(self.last_time_checked.isoformat(timespec='seconds')), 'watchlist': self.myWatchlist}
-        saveYoutubeSettings(settings)
+        self.bot.db.addOptionToDB('last_checked', self.last_time_checked)
+        # settings = {'last_checked': str(self.last_time_checked.isoformat(timespec='seconds')), 'watchlist': self.myWatchlist}
+        # saveYoutubeSettings(settings)
         return
 
         # #################### old code below ###################
@@ -232,8 +232,11 @@ class YoutubeCommands(commands.Cog):
     async def resetTime(self, ctx, message=None):
         self.last_time_checked = datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
         print("Reset the time to {}".format(self.last_time_checked.isoformat(timespec='seconds')))
-        settings = {'last_checked': str(self.last_time_checked.isoformat(timespec='seconds')), 'watchlist': self.myWatchlist}
-        saveYoutubeSettings(settings)
+        self.bot.db.addOptionToDB('last_checked', self.last_time_checked)
+        # settings = {'last_checked': str(self.last_time_checked.isoformat(timespec='seconds')), 'watchlist': self.myWatchlist}
+        # saveYoutubeSettings(settings)
+
+        self.bot.db.addOptionToDB('last_checked', self.last_time_checked)
     
     @commands.command()
     async def saveAllUploads(self, ctx, message=None):
@@ -322,11 +325,11 @@ def main():
     db.open()
 
     # set up the bot
-    settings = loadYoutubeSettings()
+    # settings = loadYoutubeSettings()
     # writeWatchlistToDB(db, settings)
 
     bot  = MyBot(database=db)
-    bot.add_cog(YoutubeCommands(bot, settings))
+    bot.add_cog(YoutubeCommands(bot))
     bot.run(api_key)
     db.close()
 

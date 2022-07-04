@@ -1,4 +1,6 @@
 import sqlite3
+import datetime
+
 db_name = 'base.db'
 def connectionToDB(db_name):
     return sqlite3.connect(db_name)
@@ -16,16 +18,23 @@ def checkForTables(db_conn):
     
     channels_flag = False
     videos_flag = False
+    options_flag = False
     for table_name in out:
         if table_name == ("channels",):
             channels_flag = True
         if table_name == ("videos",):
             videos_flag = True
+        if table_name == ("options",):
+            options_flag = True
     
     if not channels_flag:
         createChannelTable(db_conn)
+    
     if not videos_flag:
         createVideoTable(db_conn)
+    
+    if not options_flag:
+        createOptionTable(db_conn)
     
     return 
 
@@ -35,6 +44,7 @@ def clearVideoTable(db_conn):
     db_conn.commit()
     cur.close()
 
+# CREATE TABLES 
 def createChannelTable(db_conn):
     cur = db_conn.cursor()
     cur.execute('''CREATE TABLE channels
@@ -54,6 +64,18 @@ def createVideoTable(db_conn, reset=False):
     db_conn.commit()
     cur.close()
 
+def createOptionTable(db_conn, reset=False):
+    cur = db_conn.cursor()
+    if reset:
+        cur.execute('''DROP TABLE options
+                ''')
+    cur.execute('''CREATE TABLE options
+                (name text, value text)
+    ''')
+    db_conn.commit()
+    cur.close()
+
+############################# CHANNEL FUNCTIONS
 def addChannel(db_conn, name, channel_id, upload_id, last_checked, unique=True):
     cur = db_conn.cursor()
     # print('''INSERT INTO channels
@@ -138,6 +160,62 @@ def getChannels(db_conn):
     db_conn.commit()
     return out
 
+def updateChannelCheckTimes(db_conn, time):
+    # print(time)
+    # return
+    cur = db_conn.cursor()
+    cur.execute('''UPDATE channels
+                    SET last_checked = '{time}' '''.format(time=str(time)))
+    db_conn.commit()
+    cur.close()
+
+################### FUNCTIONS FOR OPTIONS TABLE
+def insertOption(db_conn, key, value):
+    # insert or update the option value
+    cur = db_conn.cursor()
+    # insert pair if it does not exist
+    cur.execute('''
+    INSERT INTO options (name, value)
+    SELECT '{key}', '{value}'
+    WHERE NOT EXISTS( SELECT * FROM options WHERE name='{key}' )
+    '''.format(key=key, value=value))
+
+    # try to update the option
+    cur.execute('''
+    UPDATE options
+    SET value = '{value}' 
+    WHERE name='{key}'
+    '''.format(key=key, value=value))#
+
+    
+    db_conn.commit()
+    cur.close()
+
+
+def selectOptions(db_conn):
+    cur = db_conn.cursor()
+    options = cur.execute('''Select name, value from options
+                ''')
+    options = {key: value for key, value in options}
+    db_conn.commit()
+    cur.close()
+    return options
+
+def selectOption(db_conn, key):
+    cur = db_conn.cursor()
+    options = cur.execute('''Select name, value from options
+                            where name == '{key}'
+                '''.format(key=key))
+    options = {key: value for key, value in options}
+    db_conn.commit()
+    cur.close()
+
+    if key in options:
+        return options[key]
+    else:
+        return None
+
+########## FUNCTIONS FOR VIDEOS TABLE
 def addVideo(db_conn, name, video_id, channel_id, uploadTime, url):
     cur = db_conn.cursor()
     # escape all single quotes in the name
@@ -157,15 +235,6 @@ def addVideo(db_conn, name, video_id, channel_id, uploadTime, url):
                             SELECT '{name}', '{video_id}', '{channel_id}', '{uploadTime}', '{url}'
                             WHERE NOT EXISTS (SELECT * FROM videos WHERE video_id = '{video_id}') '''
         .format(name=name, video_id=video_id, channel_id=channel_id, uploadTime=uploadTime, url=url))
-    db_conn.commit()
-    cur.close()
-
-def updateChannelCheckTimes(db_conn, time):
-    # print(time)
-    # return
-    cur = db_conn.cursor()
-    cur.execute('''UPDATE channels
-                    SET last_checked = '{time}' '''.format(time=str(time)))
     db_conn.commit()
     cur.close()
 
@@ -248,16 +317,66 @@ class myDatabase:
         """
         name, video_id, channel_id, uploadTime, url = video
         addVideo(self.db_connection, name, video_id, channel_id, uploadTime, url)
+    
+    def getOptionsFromDB(self):
+        """
+        returns a dict of all options stored in the option table
+        """
+
+        """
+        list of options:
+            last_check - string -> datetime
+        """
+
+        return selectOptions(self.db_connection)
+    
+    def getOptionFromDB(self, key):
+        """
+        returns a dict of all options stored in the option table
+        """
+
+        """
+        list of options:
+            last_checked - string -> datetime
+        """
+        option = selectOption(self.db_connection, key)
+        if key == 'last_checked':
+            option = datetime.datetime.fromisoformat(option).replace(tzinfo=datetime.timezone.utc)
+            print(option)
+        return option
+    
+    def addOptionToDB(self, option, value):
+        """
+        adds option to the table or 
+        updates it to the new value
+        """
+
+        """
+        current options:
+            last_checked
+        """
+        if option == 'last_checked':
+            value = value.isoformat(timespec='seconds')
+        insertOption(self.db_connection, option, value)
 
 
 
 if __name__ == "__main__":
     conn = connectionToDB(db_name)
     # resetTables(conn)
-    # checkForTables(conn)
-    createVideoTable(conn, reset=True)
+    checkForTables(conn)
+    # createVideoTable(conn, reset=True)
     # tschannel = ["Tom Scott", "UCBa659QWEk1AI4Tg--mrJ2A", "UUBa659QWEk1AI4Tg--mrJ2A"]
     # addChannel(conn, tschannel[0], tschannel[1], tschannel[2], '', unique=False)
     # getChannels(conn)
     # deleteChannels(conn, all=True)
+
+    insertOption(conn, "a", "b")
+    insertOption(conn, "b", "b")
+    insertOption(conn, "a", "c")
+    options = selectOption(conn, 'c')
+    print(options)
+
+    # print(options)
+
     conn.close()
