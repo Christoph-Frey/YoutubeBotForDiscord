@@ -132,19 +132,22 @@ def isNew(time1, time2):
 def newVideos(channel_list, last_time, api_key):
     """
     get the new videos for the channels in the list
+    list should have the format (upload_id, channel_id, channel_name, last_checked)
     """
     new_videos = []
-    for uploads, channel, channel_name in channel_list:
+    for uploads, channel, channel_name, _ in channel_list:
         # get the uploads of the channel
         url = "https://www.googleapis.com/youtube/v3/playlistItems?key="+api_key+"&part=snippet&playlistId="
         final_api_url = url + uploads
         contents = urllib.request.urlopen(final_api_url).read()
         jcontent = json.loads(contents)
         # print(jcontent['items'])
-        uploaded_video = [item['snippet'] for item in jcontent['items']]
+        uploaded_videos = [item for item in jcontent['items']]
+        
         # print(uploaded_video)
-        new_ones = list(filter(lambda video: isNew(last_time, video['publishedAt']) ,uploaded_video))
-        new_ones = [item['title'] for item in new_ones]
+        new_ones = list(filter(lambda video: isNew(last_time, video['snippet']['publishedAt']) ,uploaded_videos))
+        new_ones = [(item['snippet']['title'], item['id'], item['snippet']['channelId'], item['snippet']['publishedAt'], "https://www.youtube.com/watch?v="+item['snippet']['resourceId']['videoId']) 
+        for item in new_ones] #(name text, video_id text, channel_id text, uploadTime text, url text)
         # print(uploaded_video)
         # print(new_ones)
         # [print(item['snippet']['title']) for item in jcontent['items']]

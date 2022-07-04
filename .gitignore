@@ -562,3 +562,4 @@ FodyWeavers.xsd
 secret.py
 *.json
 *.txt
+*.db
