@@ -181,6 +181,9 @@ class myDatabase:
         self.opened = False
         self.db_connection = None
     
+    def testAndSetup(self):
+        checkForTables(conn)
+    
     def open(self):
         if not self.opened:
             self.opened = True
