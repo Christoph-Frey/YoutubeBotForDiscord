@@ -122,6 +122,10 @@ def isNew(time1, time2):
     # print(time1)
     # # print(time2)
     # print(datetime.datetime.fromisoformat(time2[:-1]+"+00:00"))
+    print(time1)
+    print(time2)
+    exit()
+
     if time1 is None:
         return True
     else:
