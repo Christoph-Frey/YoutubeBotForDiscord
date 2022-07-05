@@ -249,10 +249,14 @@ class YoutubeCommands(commands.Cog):
         await ctx.send("Getting updated is not yet implemented.".format(watchlist))
     
     @commands.command()
-    async def commands(self, ctx, *message):
+    async def listCommands(self, ctx, *message):
         identifier = " ".join(message)
 
         await ctx.send("Help is not yet implemented.".format(watchlist)) 
+    
+    @commands.command()
+    async def shutdown(self, ctx, *message):
+        self.bot.close()
 
 
 
@@ -319,6 +323,9 @@ def writeWatchlistToDB(db, settings):
     db.writeChannelsToDB(new_list)
     pass
 
+async def runBot(bot):
+    bot.start()
+
 def main():
     # get the database
     db = DB('db/base.db')
@@ -331,7 +338,19 @@ def main():
     bot  = MyBot(database=db)
     bot.add_cog(YoutubeCommands(bot))
     bot.run(api_key)
+    # bot.start()
+    # await runBot(bot)
+
+    # await bot.start()
     db.close()
+
+        # try:
+        #     loop.run_until_complete(start(*args, **kwargs))
+        # except KeyboardInterrupt:
+        #     loop.run_until_complete(close())
+        #     # cancel all tasks lingering
+        # finally:
+        #     loop.close()
 
 if __name__ == "__main__":
     # zero = datetime.datetime.min

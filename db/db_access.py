@@ -325,8 +325,10 @@ class myDatabase:
 
         """
         list of options:
-            last_check - string -> datetime
+            last_check - string -> datetime -> TODO: implement the conversion
         """
+
+        
 
         return selectOptions(self.db_connection)
     
@@ -358,7 +360,6 @@ class myDatabase:
         if option == 'last_checked':
             value = value.isoformat(timespec='seconds')
         insertOption(self.db_connection, option, value)
-
 
 
 if __name__ == "__main__":
