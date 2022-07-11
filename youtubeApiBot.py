@@ -256,7 +256,8 @@ class YoutubeCommands(commands.Cog):
     
     @commands.command()
     async def shutdown(self, ctx, *message):
-        self.bot.close()
+        # await self.bot.close()
+        pass # make this work better
 
 
 
@@ -323,8 +324,8 @@ def writeWatchlistToDB(db, settings):
     db.writeChannelsToDB(new_list)
     pass
 
-async def runBot(bot):
-    bot.start()
+# async def runBot(bot):
+#     bot.start()
 
 def main():
     # get the database
@@ -337,7 +338,19 @@ def main():
 
     bot  = MyBot(database=db)
     bot.add_cog(YoutubeCommands(bot))
-    bot.run(api_key)
+    # bot.run(api_key)
+
+    asyncio.run(bot.start(api_key))
+
+    # write a function
+    # try -> loop.run(bot.start())
+    # except -> loop.run(bot.close())
+    # finally: loop.close()
+
+    # listen to the user throwing a shutdown request
+
+
+
     # bot.start()
     # await runBot(bot)
 
