@@ -251,6 +251,13 @@ class YoutubeCommands(commands.Cog):
         # matches message content to a channel
         # gets all uploads by channel and stores them in the db
         raise NotImplementedError
+
+    @commands.command()
+    async def contained(self, ctx, *message):
+        identifier = " ".join(message)
+        if identifier != "":
+            results = self.bot.db.findMatch(identifier)
+            await ctx.channel.send("found matches for {} : {}".format(identifier, results))
     
     @commands.command()
     async def getUploads(self, ctx, *message):

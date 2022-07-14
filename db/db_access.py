@@ -148,7 +148,37 @@ def deleteChannels(db_conn, name=None, channel_id=None, upload_id=None):
         out = cur.execute('''DELETE from channels'''+ conditional)
     # [print(item) for item in out]
     cur.close()
-    conn.commit()
+    db_conn.commit()
+
+def findContent(db_conn, name=None, channel_id=None, upload_id=None):
+    """
+    deletes any channel that contains ANY of the given attributes
+    """
+    conditional=None
+    assert(not (name is None and channel_id is None and upload_id is None))
+    conditional = " WHERE"
+    if name is not None:
+        conditional = conditional + " name LIKE '%{}%'".format(name)
+    if channel_id is not None:
+        if conditional != " WHERE":
+            conditional = conditional + " OR"
+        conditional = conditional + " channel_id LIKE '%{}%'".format(channel_id)
+    if upload_id is not None:
+        if conditional != " WHERE":
+            conditional = conditional + " OR"
+        conditional = conditional + " upload_id LIKE '%{}%'".format(upload_id)
+    cur = db_conn.cursor()
+    out = []
+    if conditional:
+        # print('''DELETE from channels'''+conditional)
+        out = cur.execute('''Select * from channels'''+ conditional)
+    # [print(item) for item in out]
+
+    results = list(out)
+    cur.close()
+    db_conn.commit()
+
+    return results
 
 def getChannels(db_conn):
     cur = db_conn.cursor()
@@ -360,6 +390,10 @@ class myDatabase:
         if option == 'last_checked':
             value = value.isoformat(timespec='seconds')
         insertOption(self.db_connection, option, value)
+
+    def findMatch(self, identifier):
+        if self.opened:
+            return findContent(self.db_connection, name=identifier, channel_id=identifier, upload_id=identifier)
 
 
 if __name__ == "__main__":
