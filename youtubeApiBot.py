@@ -338,9 +338,9 @@ def main():
 
     bot  = MyBot(database=db)
     bot.add_cog(YoutubeCommands(bot))
-    # bot.run(api_key)
+    bot.run(api_key)
 
-    asyncio.run(bot.start(api_key))
+    #asyncio.run(bot.start(api_key))
 
     # write a function
     # try -> loop.run(bot.start())
