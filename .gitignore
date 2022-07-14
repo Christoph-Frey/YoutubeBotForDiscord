@@ -563,3 +563,4 @@ secret.py
 *.json
 *.txt
 *.db
+.idea

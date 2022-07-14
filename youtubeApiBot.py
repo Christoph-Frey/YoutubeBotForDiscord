@@ -237,28 +237,38 @@ class YoutubeCommands(commands.Cog):
         # saveYoutubeSettings(settings)
 
         self.bot.db.addOptionToDB('last_checked', self.last_time_checked)
-    
+
+    @commands.command()
+    async def clear(self, ctx, *message):
+        channel = ctx.channel
+        def is_me(m):
+            return m.author == self.bot.user
+        deleted = await channel.purge(limit=100, check=is_me)
+        await channel.send("Deleted {} Bot Messages".format(len(deleted)))
+
     @commands.command()
     async def saveAllUploads(self, ctx, message=None):
-        pass
+        # matches message content to a channel
+        # gets all uploads by channel and stores them in the db
+        raise NotImplementedError
     
     @commands.command()
     async def getUploads(self, ctx, *message):
         identifier = " ".join(message)
+        raise NotImplementedError
 
-        await ctx.send("Getting updated is not yet implemented.".format(watchlist))
     
     @commands.command()
     async def listCommands(self, ctx, *message):
         identifier = " ".join(message)
-
-        await ctx.send("Help is not yet implemented.".format(watchlist)) 
+        raise NotImplementedError
     
     @commands.command()
     async def shutdown(self, ctx, *message):
-        # await self.bot.close()
-        pass # make this work better
-
+        self.bot.db.close()
+        await ctx.message.delete()
+        print("Shut down by User")
+        exit(0)
 
 
 
