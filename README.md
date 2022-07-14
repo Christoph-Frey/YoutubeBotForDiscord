@@ -1,1 +1,4 @@
-# discord bot that checks for new youtube videos
+#
+Discord Bot that allows to check from Discord for new videos
+
+===================================
